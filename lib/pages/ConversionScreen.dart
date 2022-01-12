@@ -9,7 +9,7 @@ class UnitConverterPage extends StatefulWidget {
   State<UnitConverterPage> createState() => _UnitConverterPageState();
 }
 
-class _UnitConverterPageState extends State<UnitConverterPage> {
+class _UnitConverterPageState extends State<UnitConverterPage> with AutomaticKeepAliveClientMixin<UnitConverterPage> {
   String from = "cup";
   String to = "ml";
   double? rawValue;
@@ -55,11 +55,11 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
   @override
   Widget build(BuildContext context) {
     String result = "";
-    if (weights.contains(from) && !weights.contains(to)) {
+    if (weights.contains(from) && (!weights.contains(to) || from == to)) {
       List tempList = List.from(weights);
       tempList.remove(from);
       to = tempList[0];
-    } else if (!weights.contains(from) && weights.contains(to)) {
+    } else if (!weights.contains(from) && (weights.contains(to) || from == to)) {
       List tempList = List.from(volumes);
       tempList.remove(from);
       to = tempList[0];
@@ -150,4 +150,7 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

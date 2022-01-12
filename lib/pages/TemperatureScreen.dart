@@ -9,7 +9,7 @@ class TempConverterPage extends StatefulWidget {
   State<TempConverterPage> createState() => _TempConverterPageState();
 }
 
-class _TempConverterPageState extends State<TempConverterPage> {
+class _TempConverterPageState extends State<TempConverterPage> with AutomaticKeepAliveClientMixin<TempConverterPage> {
   String dropdownValue = "C";
   double? tempVal;
 
@@ -90,4 +90,7 @@ class _TempConverterPageState extends State<TempConverterPage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

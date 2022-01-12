@@ -3,6 +3,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CupConverterPage extends StatefulWidget {
   const CupConverterPage({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class CupConverterPage extends StatefulWidget {
   State<CupConverterPage> createState() => _CupConverterPageState();
 }
 
-class _CupConverterPageState extends State<CupConverterPage> {
+class _CupConverterPageState extends State<CupConverterPage> with AutomaticKeepAliveClientMixin<CupConverterPage> {
   String from = "cup";
   String to = "g";
   double? rawValue;
@@ -21,16 +22,7 @@ class _CupConverterPageState extends State<CupConverterPage> {
   String editorTo = "g";
 
   List<String> weights = ["g", "kg", "lb", "oz"];
-  List<String> volumes = [
-    "ml",
-    "l",
-    "cup",
-    "tsp",
-    "tbsp",
-    "pint",
-    "quart",
-    "floz"
-  ];
+  List<String> volumes = ["ml", "l", "cup", "tsp", "tbsp", "pint", "quart", "floz"];
   List<String> volumesStrings = [
     "ml",
     "l",
@@ -48,13 +40,11 @@ class _CupConverterPageState extends State<CupConverterPage> {
 
   _CupConverterPageState() {
     weightItems = List.generate(
-        4,
-        (index) => DropdownMenuItem<String>(
-            value: weights[index], child: Text(weights[index])));
+        4, (index) => DropdownMenuItem<String>(value: weights[index], child: Text(weights[index])));
     volumeItems = List.generate(
         8,
-        (index) => DropdownMenuItem<String>(
-            value: volumes[index], child: Text(volumesStrings[index])));
+        (index) =>
+            DropdownMenuItem<String>(value: volumes[index], child: Text(volumesStrings[index])));
     combinedItems = weightItems! + volumeItems!;
   }
 
@@ -69,14 +59,14 @@ class _CupConverterPageState extends State<CupConverterPage> {
       to = tempList[0];
     }
     if (rawValue != null) {
-      if (substance == null)
+      if (substance == null) {
         result = "";
-      else
-        result = TemperatureConverter.convertSubstance(
-                    substance!, from, to, rawValue!)
+      } else {
+        result = TemperatureConverter.convertSubstance(substance!, from, to, rawValue!)
                 ?.toStringAsPrecision(5)
                 .replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "") ??
             "";
+      }
     }
     List<DropdownMenuItem<String>> toItems =
         weights.contains(from) ? List.of(volumeItems!) : List.of(weightItems!);
@@ -140,8 +130,7 @@ class _CupConverterPageState extends State<CupConverterPage> {
                 showSearchBox: true,
                 items: TemperatureConverter.substances(),
                 label: "Ingredient",
-                emptyBuilder: (context, searchEntry) =>
-                    Center(child: Text('No ingredient found')),
+                emptyBuilder: (context, searchEntry) => Center(child: Text('No ingredient found')),
                 onChanged: (selected) => {
                       setState(() {
                         substance = selected;
@@ -186,16 +175,10 @@ class _CupConverterPageState extends State<CupConverterPage> {
             ),
             CupertinoButton(
               child: Text("Edit ingredient",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyText1!
-                      .copyWith(color: Colors.white)),
+                  style: Theme.of(context).textTheme.bodyText1!.copyWith(color: Colors.white)),
               onPressed: substance == null
                   ? null
-                  : () => {
-                        _showDialog(context,
-                            editing: substance, from: from, to: to)
-                      },
+                  : () => {_showDialog(context, editing: substance, from: from, to: to)},
               color: Colors.blue,
             ),
             const SizedBox(
@@ -203,10 +186,7 @@ class _CupConverterPageState extends State<CupConverterPage> {
             ),
             CupertinoButton(
                 child: Text("New ingredient",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1!
-                        .copyWith(color: Colors.white)),
+                    style: Theme.of(context).textTheme.bodyText1!.copyWith(color: Colors.white)),
                 onPressed: () {
                   _showDialog(context);
                 },
@@ -217,156 +197,156 @@ class _CupConverterPageState extends State<CupConverterPage> {
     );
   }
 
-  void _showDialog(BuildContext context,
-      {String? editing, String? from, String? to}) {
+  void _showDialog(BuildContext context, {String? editing, String? from, String? to}) {
+    double? density =
+        editing == null ? null : TemperatureConverter.convertSubstance(editing, "cup", "g", 1);
+    TextEditingController textEditingController = TextEditingController()..text = density == null ? "" : density.toString();
+
     showDialog(
-        context: context,
-        builder: (context) => Center(
-              child: Column(children: [
-                Spacer(
-                  flex: 1,
-                ),
-                Dialog(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.0),
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setOuterState) => Center(
+            child: Column(children: [
+          const Spacer(
+            flex: 1,
+          ),
+          Dialog(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      (editing == null) ? "Add ingredient" : "Edit ingredient",
+                      style: Theme.of(context).textTheme.headline5,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            (editing == null)
-                                ? "Add ingredient"
-                                : "Edit ingredient",
-                            style: Theme.of(context).textTheme.headline5,
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          (editing == null)
-                              ? const TextField(
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Ingredient name',
-                                  ),
-                                  style: TextStyle(fontSize: 20),
-                                )
-                              : Text(
-                                  editing,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1!
-                                      .copyWith(fontStyle: FontStyle.italic),
-                                ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          (editing == null)
-                              ? StatefulBuilder(
-                                  builder: (context, setState) {
-                                    return Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        DropdownButton(
-                                          value: editorTo,
-                                          items: weightItems,
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              editorTo = newValue ?? "g";
-                                            });
-                                          },
-                                          style: const TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.black),
-                                        ),
-                                        Text(
-                                          "per",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText1,
-                                        ),
-                                        DropdownButton(
-                                          value: editorFrom,
-                                          items: volumeItems,
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              editorFrom = newValue ?? "cup";
-                                            });
-                                          },
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.black),
-                                        )
-                                      ],
-                                    );
-                                  },
-                                )
-                              : Text(
-                                  "$to per $from",
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
+                    const SizedBox(
+                      height: 25,
+                    ),
+                    (editing == null)
+                        ? const TextField(
+                            decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: 'Value',
+                              hintText: 'Ingredient name',
                             ),
                             style: TextStyle(fontSize: 20),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r"[0-9.]")),
-                              LengthLimitingTextInputFormatter(6)
-                            ],
+                          )
+                        : Text(
+                            editing,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.montserrat(textStyle: Theme.of(context)
+                                .textTheme
+                                .bodyText1!
+                                .copyWith(fontStyle: FontStyle.italic, fontWeight: FontWeight.w200)),
                           ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              MaterialButton(
-                                  child: Text(
-                                    editing == null ? "Cancel" : "Delete",
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: (editing != null &&
-                                                TemperatureConverter
-                                                        .originalSubstances()!
-                                                    .contains(editing))
-                                            ? Colors.grey
-                                            : Colors.blue),
-                                  ),
-                                  onPressed: (editing != null &&
-                                          TemperatureConverter
-                                                  .originalSubstances()!
-                                              .contains(editing))
-                                      ? null
-                                      : () => {Navigator.pop(context)}),
-                              MaterialButton(
-                                  child: const Text(
-                                    "Submit",
-                                    style: TextStyle(
-                                        fontSize: 20, color: Colors.blue),
-                                  ),
-                                  onPressed: () => {Navigator.pop(context)}),
-                            ],
-                          ),
-                        ],
-                      ),
+                    const SizedBox(
+                      height: 10,
                     ),
-                  ),
+                    (editing == null)
+                        ? StatefulBuilder(
+                            builder: (context, setState) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  DropdownButton(
+                                    value: editorTo,
+                                    items: weightItems,
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        editorTo = newValue ?? "g";
+                                      });
+                                    },
+                                    style: const TextStyle(fontSize: 20, color: Colors.black),
+                                  ),
+                                  Text(
+                                    "per",
+                                    style: Theme.of(context).textTheme.bodyText1,
+                                  ),
+                                  DropdownButton(
+                                    value: editorFrom,
+                                    items: volumeItems,
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        editorFrom = newValue ?? "cup";
+                                      });
+                                    },
+                                    style: TextStyle(fontSize: 20, color: Colors.black),
+                                  )
+                                ],
+                              );
+                            },
+                          )
+                        : Text(
+                            "$to per $from",
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Value',
+                      ),
+                      style: TextStyle(fontSize: 20),
+                      controller: textEditingController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r"[0-9.]")),
+                        LengthLimitingTextInputFormatter(6)
+                      ],
+                      onChanged: (newText) {
+                        setOuterState(() {density = double.tryParse(newText);});
+                      },
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        MaterialButton(
+                            child: Text(
+                              editing == null ? "Cancel" : "Delete",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: (editing != null &&
+                                          TemperatureConverter.originalSubstances()!
+                                              .contains(editing))
+                                      ? Colors.grey
+                                      : Colors.blue),
+                            ),
+                            onPressed: (editing != null &&
+                                    TemperatureConverter.originalSubstances()!.contains(editing))
+                                ? null
+                                : () => {Navigator.pop(context)}),
+                        MaterialButton(
+                            child: Text(
+                              "Submit",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: (density == null ? Colors.grey : Colors.blue)),
+                            ),
+                            onPressed: density == null ? null : () => {Navigator.pop(context)}),
+                      ],
+                    ),
+                  ],
                 ),
-                const Spacer(
-                  flex: 1,
-                )
-              ]),
-            ));
+              ),
+            ),
+          ),
+          const Spacer(
+            flex: 1,
+          )
+        ])),
+      ),
+    );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -113,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage>
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14.0),
                 child: PopupMenuButton(
-                    child: Icon(Icons.settings),
+                    child: const Icon(Icons.settings),
                     itemBuilder: (context) => [
                           const PopupMenuItem(
                             child: Text("Remove ads"),
